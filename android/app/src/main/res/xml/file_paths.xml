@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Dossier temporaire utilisé par share_plus pour les fichiers PDF -->
+    <cache-path name="cache" path="." />
+    <!-- Dossier documents de l'app (signature, logo) -->
+    <files-path name="files" path="." />
+    <!-- Stockage externe temporaire (printing) -->
+    <external-cache-path name="external_cache" path="." />
+</paths>

@@ -1,0 +1,52 @@
+name: front_flutter_devis_app
+description: "Devivy — Application de création de devis professionnels"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Local storage
+  sqflite: ^2.4.2
+  path: ^1.9.1
+  shared_preferences: ^2.3.5
+
+  # PDF generation & sharing
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  share_plus: ^10.1.4
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # Utils
+  uuid: ^4.5.1
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  http: ^1.2.2
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  riverpod_generator: ^2.6.1
+  build_runner: ^2.4.14
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fonts/
+    - assets/templates/

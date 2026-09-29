@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>59712929693-aq0aeucl0ebcid0cm8b88b7umd38o3l7.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.59712929693-aq0aeucl0ebcid0cm8b88b7umd38o3l7</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDRz9udU6hYxbYPyrMo7QF-LBr3y1BpYTk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>59712929693</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.akouetekaleb.devivy</string>
+	<key>PROJECT_ID</key>
+	<string>devivy</string>
+	<key>STORAGE_BUCKET</key>
+	<string>devivy.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:59712929693:ios:5cff854a07b8538d57b974</string>
+</dict>
+</plist>

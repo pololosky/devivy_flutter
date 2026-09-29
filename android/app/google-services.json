@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "59712929693",
+    "project_id": "devivy",
+    "storage_bucket": "devivy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59712929693:android:f4ac5f3752c12c3557b974",
+        "android_client_info": {
+          "package_name": "com.akouetekaleb.devivy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59712929693-c61tbsltfk93hqp4a4rob8n54cqfevh6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvbBdwV7cOY-F1Acdk8jCcKq7TEtGP7Xs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59712929693-c61tbsltfk93hqp4a4rob8n54cqfevh6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "59712929693-aq0aeucl0ebcid0cm8b88b7umd38o3l7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.akouetekaleb.devivy"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

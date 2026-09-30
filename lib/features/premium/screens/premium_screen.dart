@@ -36,8 +36,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
     setState(() => _purchasing = true);
     try {
-      final success = await ApiService.purchasePremium(
-          token: appState.authToken!);
+      final success = await ApiService.confirmPremium();
       if (success && mounted) {
         await ref.read(appStateProvider.notifier).setPremium(true);
         ScaffoldMessenger.of(context).showSnackBar(

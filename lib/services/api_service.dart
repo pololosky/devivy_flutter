@@ -1,85 +1,69 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
-/// Devivy API client — points to the FastAPI backend.
-/// Change [baseUrl] to match your server in production.
+/// Client HTTP Devivy — authentification via Firebase ID Token.
+/// Tous les appels sont conditionnés à FirebaseAuth.instance.currentUser != null.
 class ApiService {
   ApiService._();
 
-  // Update this to your actual server URL
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator localhost
+  static const String baseUrl = 'http://10.0.2.2:8000';
+  // Pour appareil physique sur le même réseau : 'http://192.168.x.x:8000'
+  // Pour production : 'https://api.devivy.app'
 
-  static Map<String, String> _authHeaders(String token) => {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+  // ── Headers ────────────────────────────────────────────────────────────────
 
-  static const _headers = {'Content-Type': 'application/json'};
+  static Future<Map<String, String>?> _headers() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+    final token = await user.getIdToken();
+    if (token == null) return null;
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
-  // ── Auth ────────────────────────────────────────────────────────────────
+  // ── Session start ──────────────────────────────────────────────────────────
 
-  /// Returns {token, isPremium} or null on failure.
-  static Future<Map<String, dynamic>?> login({
-    required String email,
-    required String password,
-  }) async {
+  /// Appelé une fois au démarrage si connecté. Synchronise le statut Premium.
+  /// Retourne {is_premium: bool} ou null si offline/non connecté.
+  static Future<Map<String, dynamic>?> sessionStart() async {
+    final headers = await _headers();
+    if (headers == null) return null;
     try {
       final res = await http
-          .post(
-            Uri.parse('$baseUrl/auth/login'),
-            headers: _headers,
-            body: jsonEncode({'email': email, 'password': password}),
-          )
-          .timeout(const Duration(seconds: 15));
-
+          .post(Uri.parse('$baseUrl/auth/session-start'), headers: headers)
+          .timeout(const Duration(seconds: 10));
       if (res.statusCode == 200) {
-        final data = jsonDecode(res.body) as Map<String, dynamic>;
-        return {
-          'token': data['access_token'] as String,
-          'isPremium': (data['is_premium'] as bool?) ?? false,
-        };
+        return jsonDecode(res.body) as Map<String, dynamic>;
       }
-      return null;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
+    return null;
   }
 
-  /// Returns {token} or null on failure.
-  static Future<Map<String, dynamic>?> register({
-    required String email,
-    required String password,
-  }) async {
+  // ── Premium ────────────────────────────────────────────────────────────────
+
+  static Future<bool?> getPremiumStatus() async {
+    final headers = await _headers();
+    if (headers == null) return null;
     try {
       final res = await http
-          .post(
-            Uri.parse('$baseUrl/auth/register'),
-            headers: _headers,
-            body: jsonEncode({'email': email, 'password': password}),
-          )
-          .timeout(const Duration(seconds: 15));
-
-      if (res.statusCode == 201) {
-        final data = jsonDecode(res.body) as Map<String, dynamic>;
-        return {'token': data['access_token'] as String};
+          .get(Uri.parse('$baseUrl/premium/status'), headers: headers)
+          .timeout(const Duration(seconds: 10));
+      if (res.statusCode == 200) {
+        return (jsonDecode(res.body) as Map<String, dynamic>)['is_premium'] as bool?;
       }
-      return null;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
+    return null;
   }
 
-  // ── Premium ─────────────────────────────────────────────────────────────
-
-  /// Triggers premium purchase (payment intent via Stripe on backend).
-  /// Returns true on success.
-  static Future<bool> purchasePremium({required String token}) async {
+  static Future<bool> confirmPremium() async {
+    final headers = await _headers();
+    if (headers == null) return false;
     try {
       final res = await http
-          .post(
-            Uri.parse('$baseUrl/premium/purchase'),
-            headers: _authHeaders(token),
-          )
+          .post(Uri.parse('$baseUrl/premium/confirm'), headers: headers)
           .timeout(const Duration(seconds: 20));
       return res.statusCode == 200;
     } catch (_) {
@@ -87,72 +71,60 @@ class ApiService {
     }
   }
 
-  // ── Sync ────────────────────────────────────────────────────────────────
+  // ── Sync devis ─────────────────────────────────────────────────────────────
 
-  /// Push a quote to the backend for cloud sync.
-  static Future<String?> syncQuote({
-    required String token,
-    required Map<String, dynamic> quoteJson,
-  }) async {
+  static Future<String?> syncQuote(Map<String, dynamic> quoteJson) async {
+    final headers = await _headers();
+    if (headers == null) return null;
     try {
       final res = await http
-          .post(
-            Uri.parse('$baseUrl/quotes/sync'),
-            headers: _authHeaders(token),
-            body: jsonEncode(quoteJson),
-          )
+          .post(Uri.parse('$baseUrl/quotes/sync'),
+              headers: headers, body: jsonEncode(quoteJson))
           .timeout(const Duration(seconds: 15));
       if (res.statusCode == 200 || res.statusCode == 201) {
-        final data = jsonDecode(res.body) as Map<String, dynamic>;
-        return data['id'] as String?;
+        return (jsonDecode(res.body) as Map<String, dynamic>)['id']?.toString();
       }
-      return null;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
+    return null;
   }
 
-  /// Fetch all synced quotes from backend.
-  static Future<List<Map<String, dynamic>>?> fetchRemoteQuotes({
-    required String token,
-  }) async {
+  static Future<List<Map<String, dynamic>>?> fetchRemoteQuotes() async {
+    final headers = await _headers();
+    if (headers == null) return null;
     try {
       final res = await http
-          .get(
-            Uri.parse('$baseUrl/quotes'),
-            headers: _authHeaders(token),
-          )
+          .get(Uri.parse('$baseUrl/quotes'), headers: headers)
           .timeout(const Duration(seconds: 15));
       if (res.statusCode == 200) {
-        final list = jsonDecode(res.body) as List<dynamic>;
-        return list.cast<Map<String, dynamic>>();
+        return (jsonDecode(res.body) as List).cast<Map<String, dynamic>>();
       }
-      return null;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
+    return null;
   }
 
-  // ── Templates ───────────────────────────────────────────────────────────
+  static Future<void> deleteRemoteQuote(String localId) async {
+    final headers = await _headers();
+    if (headers == null) return;
+    try {
+      await http
+          .delete(Uri.parse('$baseUrl/quotes/$localId'), headers: headers)
+          .timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
 
-  /// Check for new template versions from the server.
-  static Future<List<Map<String, dynamic>>?> checkTemplates({
-    required String token,
-  }) async {
+  // ── Templates ──────────────────────────────────────────────────────────────
+
+  static Future<List<Map<String, dynamic>>?> checkTemplates() async {
+    final headers = await _headers();
+    if (headers == null) return null;
     try {
       final res = await http
-          .get(
-            Uri.parse('$baseUrl/templates'),
-            headers: _authHeaders(token),
-          )
+          .get(Uri.parse('$baseUrl/templates'), headers: headers)
           .timeout(const Duration(seconds: 10));
       if (res.statusCode == 200) {
-        final list = jsonDecode(res.body) as List<dynamic>;
-        return list.cast<Map<String, dynamic>>();
+        return (jsonDecode(res.body) as List).cast<Map<String, dynamic>>();
       }
-      return null;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
+    return null;
   }
 }
